@@ -6,8 +6,12 @@ import ABI from "./ABI.json";
 
 function Homepage(props) {
 
+    /**
+     * @pagination gets kinda a number of a @page to display more messages
+     */
     const [message, setMessage] = useState("");
     const [allChats, setAllChats] = useState([]);
+    const [pagination, setPagination] = useState(0);
 
     const sendMessage = async () => {
         console.log("Running sendMessage");
@@ -33,22 +37,33 @@ function Homepage(props) {
         );
 
         /**
+         * @page the number of how many messages gets displayed on a @page
          * @totalMessages get all the messages from the blockchin
+         * @starting counts the messages back
          */
+
         const totalMessages = await contract.totalMessages();
         console.log("Running totalMessages:");
         console.log(totalMessages);
+
+        const page = 10;
+        // const pagination = 4;
+        // const totalMessages = 150
+        const starting = totalMessages - (page * pagination) - 1;
 
         setAllChats([]);
 
         /**
          * Loops through all the @totalMessages from the blockchain and push the @currentMessage (i) to the array @setAllChats
          */
-        for(let i = 0; i <= totalMessages; i++) {
-            const currentMessage = await contract.Messages(i);
-            console.log("Running currentMessages:");
-            console.log(currentMessage);
-            setAllChats(prevChat => [...prevChat, currentMessage]);
+        for(let i = starting; i > starting - page; i--) {
+            console.log(i);
+            if(i >= 0) {
+                const currentMessage = await contract.Messages(i);
+                console.log("Running currentMessages:");
+                console.log(currentMessage);
+                setAllChats(prevChat => [...prevChat, currentMessage]);
+            }
         }
     }
 
@@ -56,9 +71,29 @@ function Homepage(props) {
         getMessages();
     }, []);
 
+    /**
+     * @back and @forward creates the functions to switch the @pagination
+     */
+    const back = async () => {
+        setPagination((old) => old + 1);
+        getMessages();
+    }
+    
+    const forward = async () => {
+        setPagination((old) => old - 1);
+        getMessages();
+    }
+
+   
+
     return (
         <section>
                   <div class="hero">
+                  {/* <button class="header-cta"><a onClick={back} href="#">Back</a></button> */}
+                  {/* <button class="header-cta"><a onClick={forward} href="#">Forward</a></button> */}
+                  
+                  <button class="header-cta" onClick={back} >Back</button>
+                  <button class="header-cta" onClick={forward} >Forward</button>
 
                       <div className="chatMessage">
                         {allChats.map((item) => (
