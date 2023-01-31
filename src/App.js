@@ -10,7 +10,7 @@ function App() {
             <header>
                 <nav>
                     <div className="logo">
-                        <h1> <a href=""> Grandpa's Chat </a></h1>
+                        <h1> <a href=""> PATRICK's Chat </a></h1>
                     </div>
   
                     <ul>
