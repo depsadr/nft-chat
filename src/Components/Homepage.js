@@ -3,18 +3,23 @@ import Chat from "./Chat.js";
 import "./Homepage.css";
 import { ethers } from "ethers";
 import ABI from "./ABI.json";
+import { concat } from "ethers/lib/utils.js";
 
 function Homepage(props) {
 
     /**
      * @pagination gets kinda a number of a @page to display more messages
+     * @NFT and @NFTList variable gets called on @getNFTs function
      */
     const [message, setMessage] = useState("");
     const [allChats, setAllChats] = useState([]);
     const [pagination, setPagination] = useState(0);
+    const [NFT, setNFT] = useState(0);
+    const [NFTList, setNFTList] = useState([])
 
     const sendMessage = async () => {
         console.log("Running sendMessage");
+        // Get the contract 
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
         const contract = new ethers.Contract(
@@ -23,11 +28,12 @@ function Homepage(props) {
             signer
         );
 
-        const addMessage = await contract.addMessage(message, 0)
+        const addMessage = await contract.addMessage(message, NFT)
         console.log("addMessage(): " + addMessage);
     }
 
     const getMessages = async () => {
+        // Get the contract 
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
         const contract = new ethers.Contract(
@@ -35,6 +41,20 @@ function Homepage(props) {
             ABI,
             signer
         );
+
+        // getNFTs();
+        // Get the current wallet address 
+        const currentAddress = provider.getSigner().getAddress();
+        console.log("Show current wallet address: " + currentAddress);
+
+        const amountOfNFTs = await contract.balanceOf(currentAddress);
+        console.log("Show balanceOf current wallet address: " + amountOfNFTs);
+
+        for(let i = 0; i < amountOfNFTs; i++) {
+            const currentNFT = await contract.tokenOfOwnerByIndex(currentAddress, i);
+            setNFTList(old => [...old, currentNFT]);
+            console.log("Show current NFT: " + currentNFT);
+        }
 
         /**
          * @page the number of how many messages gets displayed on a @page
@@ -67,6 +87,42 @@ function Homepage(props) {
         }
     }
 
+    // const getNFTs = async () => {
+    //     // Get the contract 
+    //     const provider = new ethers.providers.Web3Provider(window.ethereum);
+    //     const signer = provider.getSigner();
+    //     const contract = new ethers.Contract(
+    //         "0x027778474953c38aEf46ADE7b08357C88773f4af",
+    //         ABI,
+    //         signer
+    //     );
+
+    //     // Get the current wallet address 
+    //     const currentAddress = provider.getSigner().getAddress();
+    //     console.log("Show current wallet address: " + currentAddress);
+
+    //     const amountOfNFTs = await contract.balanceOf(currentAddress);
+    //     console.log("Show balanceOf current wallet address: " + amountOfNFTs);
+
+    //     for(let i = 0; i < amountOfNFTs; i++) {
+    //         const currentNFT = await contract.tokenOfOwnerByIndex(currentAddress, i);
+    //         setNFTList(old => [...old, currentNFT]);
+    //         console.log("Show current NFT: " + currentNFT);
+    //     }
+    // }
+
+    const chainChanged = () => {
+        // Reloads the website
+        window.location.reload();
+    };
+    
+    // Listen to Wallet
+    window.ethereum.on('chainChanged', chainChanged);
+    // Looks for changing accounts
+    // window.ethereum.on('accountsChanged', getWalletAddress);
+
+    window.ethereum.on('accountsChanged', getMessages);
+
     useEffect(() => {
         getMessages();
     }, []);
@@ -97,7 +153,7 @@ function Homepage(props) {
 
                       <div className="chatMessage">
                         {allChats.map((item) => (
-                            <Chat text={item.sentMessage} data={item.sendFrom} />
+                            <Chat text={item.sentMessage} data={`${item.sendFrom} NFT ${item.nftId}`} />
         
                         ))}
                           {/* <Chat text="YO" image="https://yt3.ggpht.com/ytc/AMLnZu-2DrkobCQd6ri63wO9SuMFGyTbyMhD5kQ6Up2N=s900-c-k-c0x00ffffff-no-rj" data="Oct 20, 2022 8:12PM" /> */}
@@ -106,6 +162,13 @@ function Homepage(props) {
                     </div>
 
                       <div classname="Send">
+
+                        <select onChange={ (e) => setNFT(e.target.value)} name="NFTid" id="NFTid">
+                            {NFTList.map((item) => (
+                                <option key={item.toString()} value={item.toString()}>{item.toString()}</option>
+                            ))}
+                            {/* <option key={1} value="1">This is option 1</option> */}
+                        </select>
                           <input
                               className="textInput"
                               type="text"
