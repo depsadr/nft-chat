@@ -3,7 +3,6 @@ import Chat from "./Chat.js";
 import "./Homepage.css";
 import { ethers } from "ethers";
 import ABI from "./ABI.json";
-import { concat } from "ethers/lib/utils.js";
 
 function Homepage(props) {
 
@@ -80,7 +79,7 @@ function Homepage(props) {
          * Loops through all the @totalMessages from the blockchain and push the @currentMessage (i) to the array @setAllChats
          */
         for(let i = starting; i > starting - page; i--) {
-            console.log(i);
+            console.log("Show loop from totalMessages: " + i);
             if(i >= 0) {
                 const currentMessage = await contract.Messages(i);
                 console.log("Running currentMessages:");
@@ -128,19 +127,23 @@ function Homepage(props) {
 
     useEffect(() => {
         getMessages();
-    }, []);
+    }, [pagination]);
 
     /**
      * @back and @forward creates the functions to switch the @pagination
      */
     const back = async () => {
         setPagination((old) => old + 1);
-        getMessages();
+        // getMessages();
+        console.log("Running back: " + pagination);
     }
     
     const forward = async () => {
-        setPagination((old) => old - 1);
-        getMessages();
+        if(pagination != 0 ) {
+            setPagination((old) => old - 1);
+            // getMessages();
+            console.log("Running forward: " + pagination);
+        }
     }
 
    
