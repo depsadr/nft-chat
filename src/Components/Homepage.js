@@ -42,6 +42,9 @@ function Homepage(props) {
             signer
         );
 
+        /**
+         * Setting up a function to get the switched NFT token from the @onChange @nftId
+         */
         // getNFTs();
         // Get the current wallet address 
         const currentAddress = provider.getSigner().getAddress();
@@ -163,6 +166,7 @@ function Homepage(props) {
 
                       <div classname="Send">
 
+                      {/* Add onChange to switch on NFT tokens and send the NFT token with the message  */}
                         <select onChange={ (e) => setNFT(e.target.value)} name="NFTid" id="NFTid">
                             {NFTList.map((item) => (
                                 <option key={item.toString()} value={item.toString()}>{item.toString()}</option>
